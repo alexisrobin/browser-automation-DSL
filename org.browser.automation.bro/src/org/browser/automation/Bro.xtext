@@ -2,36 +2,40 @@ grammar org.browser.automation.Bro with org.eclipse.xtext.common.Terminals
 
 generate bro "http://www.browser.org/automation/Bro"
 
-Program:
-	'browser' browsers+=Browser+ '{' commands+=Command*'}'
-;
-	
-Command:
-	Instanciation | Flow | Action
+BrowserFlow:
+	{BrowserFlow} 'browser' browsers+=Browser+ '{' browserActions+=BrowserAction*'}'
 ;
 	
 Instanciation:
 	('byName' | 'byId') STRING '>' variable=ID
 ;
 
-Flow:
-	variables+=Variable+ '{' commands+=Command* '}'
+BrowserAction:
+	Instanciation | DOMFlow | Go | Wait 
 ;
 
-Action:
-	ActionWithStringArg | ActionWithIntArg | ActionNoArg
+DOMFlow:
+	variables+=Variable+ '{' domActions+=DOMAction* '}'
 ;
 
-ActionWithStringArg:
-	('go' | 'fill' | 'verify') STRING
+DOMAction:
+	BrowserAction | DOMActionWithStringArg | DOMActionWithNoArg
 ;
 
-ActionWithIntArg:
-	'wait' INT
+DOMActionWithStringArg:
+	('fill' | 'verify') STRING
 ;
 
-ActionNoArg:
+DOMActionWithNoArg:
 	'click'
+;
+
+Go:
+	'go' STRING
+;
+
+Wait:
+	'wait' INT
 ;
 	
 Browser:
