@@ -1,0 +1,43 @@
+grammar org.browser.automation.Bro with org.eclipse.xtext.common.Terminals
+
+generate bro "http://www.browser.org/automation/Bro"
+
+Program:
+	'browser' browsers+=Browser+ '{' commands+=Command*'}'
+;
+	
+Command:
+	Instanciation | Flow | Action
+;
+	
+Instanciation:
+	('byName' | 'byId') STRING '>' variable=ID
+;
+
+Flow:
+	variables+=Variable+ '{' commands+=Command* '}'
+;
+
+Action:
+	ActionWithStringArg | ActionWithIntArg | ActionNoArg
+;
+
+ActionWithStringArg:
+	('go' | 'fill' | 'verify') STRING
+;
+
+ActionWithIntArg:
+	'wait' INT
+;
+
+ActionNoArg:
+	'click'
+;
+	
+Browser:
+	'chrome' | 'edge' | 'firefox' | 'opera' | 'safari'
+;
+
+Variable:
+	ID(':first')?
+;
