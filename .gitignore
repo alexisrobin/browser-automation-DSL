@@ -7,3 +7,4 @@ xtend-gen
 .antlr-generator-*.jar
 .DS_Store
 .metadata
+ws-runtime-eclipseapp/org.openqa.selenium*

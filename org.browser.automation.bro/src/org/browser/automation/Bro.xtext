@@ -38,8 +38,8 @@ Wait:
 	'wait' INT
 ;
 	
-Browser:
-	'chrome' | 'edge' | 'firefox' | 'opera' | 'safari'
+enum Browser:
+	chrome='chrome' | edge='edge' | firefox='firefox' | opera='opera' | safari='safari'
 ;
 
 Variable:

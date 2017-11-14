@@ -7,6 +7,9 @@ import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.AbstractGenerator
 import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.generator.IGeneratorContext
+import org.browser.automation.bro.BrowserFlow
+import java.io.File
+import org.browser.automation.bro.Browser
 
 /**
  * Generates code from your model files on save.
@@ -16,10 +19,44 @@ import org.eclipse.xtext.generator.IGeneratorContext
 class BroGenerator extends AbstractGenerator {
 
 	override void doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
-//		fsa.generateFile('greetings.txt', 'People to greet: ' + 
-//			resource.allContents
-//				.filter(typeof(Greeting))
-//				.map[name]
-//				.join(', '))
+		var browserFlow = resource.contents.head as BrowserFlow
+		var sep = File.separator
+
+		//Building a platform independent URI
+		var filePath = 'bro'+sep+'LaunchBrowserAutomation.java';
+		
+		fsa.generateFile(filePath, browserFlow.compile)	
 	}
+	
+	def compile(BrowserFlow bFlow) '''
+		package bro;
+
+		import org.openqa.selenium.By;
+		import org.openqa.selenium.WebDriver;
+		import org.openqa.selenium.WebElement;
+		import org.openqa.selenium.chrome.ChromeDriver;
+		import org.openqa.selenium.support.ui.ExpectedCondition;
+		import org.openqa.selenium.support.ui.WebDriverWait;
+
+		
+		public class LaunchBrowserAutomation {
+
+			public static void main(String[] args) {
+				«FOR Browser browser : bFlow.browsers»
+					«browser.instantiateDriver»
+				«ENDFOR»
+			}
+		}
+	'''
+	
+	def instantiateDriver(Browser b) '''
+		«IF b == Browser.CHROME»
+			WebDriver driver = new ChromeDriver();
+		«ELSEIF b == Browser.FIREFOX»
+			WebDriver driver = new FireFoxDriver();
+		«ELSEIF b == Browser.SAFARI»
+			WebDriver driver = new SafariDriver();
+		«ENDIF»
+	'''
+	
 }
