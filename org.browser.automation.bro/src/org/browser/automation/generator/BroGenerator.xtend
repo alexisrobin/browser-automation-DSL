@@ -10,6 +10,15 @@ import org.eclipse.xtext.generator.IGeneratorContext
 import org.browser.automation.bro.BrowserFlow
 import java.io.File
 import org.browser.automation.bro.Browser
+import org.browser.automation.bro.BrowserAction
+import org.browser.automation.bro.Instanciation
+import org.browser.automation.bro.DOMFlow
+import org.browser.automation.bro.By
+import org.browser.automation.bro.Go
+import org.browser.automation.bro.Wait
+import org.browser.automation.bro.DOMAction
+import org.browser.automation.bro.VarCall
+import org.browser.automation.bro.VarSuffix
 
 /**
  * Generates code from your model files on save.
@@ -28,7 +37,17 @@ class BroGenerator extends AbstractGenerator {
 		fsa.generateFile(filePath, browserFlow.compile)	
 	}
 	
-	def compile(BrowserFlow bFlow) '''
+	def instantiateDriver(Browser b) '''
+		«IF b == Browser.CHROME»
+			WebDriver driver = new ChromeDriver();
+		«ELSEIF b == Browser.FIREFOX»
+			WebDriver driver = new FireFoxDriver();
+		«ELSEIF b == Browser.SAFARI»
+			WebDriver driver = new SafariDriver();
+		«ENDIF»
+	'''
+	
+	def dispatch compile(BrowserFlow bFlow) '''
 		package bro;
 
 		import org.openqa.selenium.By;
@@ -44,19 +63,41 @@ class BroGenerator extends AbstractGenerator {
 			public static void main(String[] args) {
 				«FOR Browser browser : bFlow.browsers»
 					«browser.instantiateDriver»
+					«FOR BrowserAction bAction : bFlow.browserActions»
+						«bAction.compile» 
+					«ENDFOR»
 				«ENDFOR»
 			}
 		}
 	'''
 	
-	def instantiateDriver(Browser b) '''
-		«IF b == Browser.CHROME»
-			WebDriver driver = new ChromeDriver();
-		«ELSEIF b == Browser.FIREFOX»
-			WebDriver driver = new FireFoxDriver();
-		«ELSEIF b == Browser.SAFARI»
-			WebDriver driver = new SafariDriver();
-		«ENDIF»
+	def dispatch compile(Instanciation instanciation) '''
+		«IF instanciation.by == By.BY_NAME»
+			WebElement «instanciation.getVar().name»  = driver.findElement(By.name("«instanciation.getStr()»"));
+		«ELSE »
+			WebElement «instanciation.getVar().name»  = driver.findElement(By.id("«instanciation.getStr()»"));
+		«ENDIF »
 	'''
+	
+	def dispatch compile(Go go) '''
+		driver.get("«go.getDest()»");
+	'''
+	
+	def dispatch compile(Wait wait) '''
+		driver.manage().timeouts().implicitlyWait(«wait.getTime()», TimeUnit.SECONDS);
+	'''
+
+	def dispatch compile(DOMFlow dFlow) '''
+		«FOR VarCall varCall : dFlow.variables»
+			«FOR DOMAction dAction : dFlow.domActions»
+				«varCall.getVar().name»«IF varCall.getSuffix() == VarSuffix.FIRST».get(0)«ENDIF» = «dAction.compile» 
+			«ENDFOR»
+		«ENDFOR»
+	'''
+	
+	def dispatch compile(DOMAction dAction) '''
+		truc
+	'''
+	
 	
 }

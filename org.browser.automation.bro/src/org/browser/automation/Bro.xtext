@@ -7,7 +7,7 @@ BrowserFlow:
 ;
 	
 Instanciation:
-	('byName' | 'byId') STRING '>' variable=ID
+	by=By str=STRING '>' var=Var
 ;
 
 BrowserAction:
@@ -15,7 +15,7 @@ BrowserAction:
 ;
 
 DOMFlow:
-	variables+=Variable+ '{' domActions+=DOMAction* '}'
+	variables+=VarCall+ '{' domActions+=DOMAction* '}'
 ;
 
 DOMAction:
@@ -23,25 +23,39 @@ DOMAction:
 ;
 
 DOMActionWithStringArg:
-	('fill' | 'verify') STRING
+	action=('fill' | 'verify') str=STRING
 ;
 
 DOMActionWithNoArg:
-	'click'
+	action='click'
 ;
 
 Go:
-	'go' STRING
+	'go' dest=STRING
 ;
 
 Wait:
-	'wait' INT
+	'wait' time=INT
 ;
 	
 enum Browser:
 	chrome='chrome' | edge='edge' | firefox='firefox' | opera='opera' | safari='safari'
 ;
 
-Variable:
-	ID(':first')?
+enum By:
+	byName='byName' | byId='byId'
 ;
+
+enum VarSuffix:
+	first="first"
+;
+
+Var:
+	name=ID
+;
+
+VarCall:
+	var=[Var](':'suffix=VarSuffix)?
+;
+
+

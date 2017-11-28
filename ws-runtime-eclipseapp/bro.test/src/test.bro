@@ -3,7 +3,7 @@ browser firefox edge {
 	byName "search-bar" > searchBar
 	byId "validate-button" > validateButton
 	
-	searchBar:first {
+	searchBar {
 		fill "potato"
 	}
 	
@@ -17,4 +17,5 @@ browser firefox edge {
 	googleResults:first {
 		verify "https://fr.wikipedia.org/wikiPotato"
 	}
+	
 }
